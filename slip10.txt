@@ -1,0 +1,81 @@
+Slip 10
+<!DOCTYPE html>
+<html lang=”en”>
+<head>
+<meta charset=”UTF-8”>
+<meta name=”viewport” content=”width=device-width, initial-scale=1.0”>
+<title>CSS Transition Example</title>
+<style>
+Body {
+Font-family: Arial, sans-serif;
+Display: flex;
+Justify-content: center;
+Align-items: center;
+Height: 100vh;
+Margin: 0;
+Background-color: #f4f4f4;
+}
+Button {
+Padding: 10px 20px;
+Font-size: 16px;
+Border: none;
+Cursor: pointer;
+Background-color: #4caf50;
+Color: #fff;
+Border-radius: 4px;
+Transition-property: background-color, color;
+Transition-duration: 0.3s;
+Transition-delay: 0.1s;
+}
+Button:hover {
+Background-color: #45a049;
+Color: #e0e0e0;
+}
+</style>
+</head>
+<body>
+<button>Hover Me</button>
+</body>
+</html>
+Q2)
+// Product Collection
+[
+{ “product_id”: 101, “product_name”: “Laptop”, “brand”: “Dell”, “warranty_period”: “1 year”, “rating”: 4.5 },
+{ “product_id”: 102, “product_name”: “Smartphone”, “brand”: “Samsung”, “warranty_period”: “2 years”, “rating”: 4.8 },
+{ “product_id”: 103, “product_name”: “Headphones”, “brand”: “Sony”, “warranty_period”: “1 year”, “rating”: 4.2 },
+// ... (additional products)
+]
+// Customer Collection
+[
+{ “customer_id”: 201, “customer_name”: “John Doe”, “city”: “New York” },
+{ “customer_id”: 202, “customer_name”: “Alice Smith”, “city”: “Los Angeles” },
+{ “customer_id”: 203, “customer_name”: “Bob Johnson”, “city”: “Chicago” },
+// ... (additional customers)
+]
+// Purchase Collection
+[
+{ “purchase_id”: 301, “customer_id”: 201, “product_id”: 101, “purchase_date”: “2023-08-15”, “bill_amount”: 1200 },
+{ “purchase_id”: 302, “customer_id”: 202, “product_id”: 102, “purchase_date”: “2023-08-15”, “bill_amount”: 800 },
+{ “purchase_id”: 303, “customer_id”: 203, “product_id”: 103, “purchase_date”: “2023-08-15”, “bill_amount”: 150 },
+// ... (additional purchases)
+]
+a. List the names of products whose warranty period is one year:
+Db.product.find({ “warranty_period”: “1 year” }, { “_id”: 0, “product_name”: 1 })
+b. List the customers who have made a purchase on “15/08/2023”:
+Db.purchase.aggregate([
+{ $match: { “purchase_date”: “2023-08-15” } },
+{ $lookup: { from: “customer”, localField: “customer_id”, foreignField: “customer_id”, as: “customer_info” } },
+{ $unwind: “$customer_info” },
+{ $project: { “customer_info.customer_id”: 1, “customer_info.customer_name”: 1, “customer_info.city”: 1 } }
+])
+c. Display the names of products with the brand that has the highest rating:
+Var maxRating = db.product.find().sort({ “rating”: -1 }).limit(1).next().rating;
+Db.product.find({ “rating”: maxRating }, { “_id”: 0, “product_name”: 1, “brand”: 1 })
+d. Display customers who stay in a specific city and have a bill amount greater than 50000:
+Db.purchase.aggregate([
+{ $match: { “bill_amount”: { $gt: 50000 } } },
+{ $lookup: { from: “customer”, localField: “customer_id”, foreignField: “customer_id”, as: “customer_info” } },
+{ $unwind: “$customer_info” },
+{ $match: { “customer_info.city”: “New York” } },
+{ $project: { “customer_info.customer_id”: 1, “customer_info.customer_name”: 1, “customer_info.city”: 1 } }
+])
