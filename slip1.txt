@@ -1,0 +1,108 @@
+Q1)
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+Body
+{ font-family: Arial, sans-serif; }
+H1 {
+Font-size: 6pt;
+Color: black;
+}
+Form {
+Background-color: lightblue;
+}
+</style>
+</head>
+<body>
+<h1><b>Project Management</b></h1>
+<form action=””> <label for=”projectname”>Project Name:</label>
+<input type=”text” id=”projectname” name=”projectname”><br><br>
+<label for=”assignedto”>Assigned to:</label>
+<input type=”text” id=”assignedto” name=”assignedto”><br><br>
+<label for=”startdate”>Start Date:</label>
+<input type=”date” id=”startdate” name=”startdate”><br><br>
+<label for=”enddate”>End Date:</label>
+<input type=”date” id=”enddate” name=”enddate”><br><br>
+<label for=”priority”>Priority:</label>
+<select id=”priority” name=”priority”>
+<option value=”high”>High</option>
+<option value=”average”>Average</option>
+<option value=”low”>Low</option>
+</select><br><br>
+<label for=”description”>Description:</label>
+<textarea id=”description” name=”description” rows=”4” cols=”50”></textarea><br><br>
+<input type=”submit” value=”Submit”>
+<input type=”submit” value=”clear”>
+</form>
+</body>
+</html>
+
+
+Q2)
+// Property Collection
+[
+{
+“property_id”: 1,
+“area”: “Mumbai”,
+“rate”: 120000,
+“owner_id”: 101
+},
+{
+“property_id”: 2,
+“area”: “Nashik”,
+“rate”: 95000,
+“owner_id”: 102
+},
+{
+“property_id”: 3,
+“area”: “Pune”,
+“rate”: 105000,
+“owner_id”: 103
+},
+{
+“property_id”: 4,
+“area”: “Mumbai”,
+“rate”: 80000,
+“owner_id”: 104
+},
+{
+“property_id”: 5,
+“area”: “Nashik”,
+“rate”: 90000,
+“owner_id”: 105
+}
+]
+// Owner Collection
+[
+{
+“owner_id”: 101,
+“name”: “Mr. Gupta”
+},
+{
+“owner_id”: 102,
+“name”: “Mr. Patil”
+},
+{
+“owner_id”: 103,
+“name”: “Mrs. Deshmukh”
+},
+{
+“owner_id”: 104,
+“name”: “Mr. Shah”
+},
+{
+“owner_id”: 105,
+“name”: “Mr. Patil”
+}
+]
+a. Display area-wise property details:
+Db.property.find({}, { _id: 0, area: 1, rate: 1 })
+b. Display property owned by ‘Mr. Patil’ having the minimum rate:
+Db.property.find({ owner_id: db.owner.findOne({ name: “Mr. Patil” }).owner_id })
+.sort({ rate: 1 })
+.limit(1)
+c. Give the details of the owner whose property is at “Nashik”:
+Db.owner.findOne({ owner_id: db.property.findOne({ area: “Nashik” }).owner_id })
+d. Display the area of the property whose rate is less than 100000:
+Db.property.find({ rate: { $lt: 100000 } }, { _id: 0, area: 1 })
