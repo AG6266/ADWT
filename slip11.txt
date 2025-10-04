@@ -1,0 +1,117 @@
+Slip 11
+Q1)
+<!DOCTYPE html>
+<html lang=”en”>
+<head>
+<meta charset=”UTF-8”>
+<meta name=”viewport” content=”width=device-width, initial-scale=1.0”>
+<style>
+Body {
+Margin: 0;
+Padding: 0;
+Font-family: Arial, sans-serif;
+Display: flex;
+Flex-direction: column;
+Height: 100vh;
+}
+Header {
+Background-color: #333;
+Color: #fff;
+Text-align: center;
+Padding: 10px;
+}
+Main {
+Display: flex;
+Flex: 1;
+}
+Nav {
+Width: 200px;
+Background-color: #f0f0f0;
+Padding: 10px;
+Box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+Nav a {
+Display: block;
+Margin-bottom: 10px;
+Text-decoration: none;
+Color: #333;
+}
+Article {
+Flex: 1;
+Padding: 20px;
+}
+</style>
+</head>
+<body>
+<header>
+<h1>Company Name</h1>
+</header>
+<main>
+<nav>
+<a href=”#” onclick=”showDepartment(‘department1’)”>Department 1</a>
+<a href=”#” onclick=”showDepartment(‘department2’)”>Department 2</a>
+<a href=”#” onclick=”showDepartment(‘department3’)”>Department 3</a>
+<!—Add more departments as needed →
+</nav>
+<article id=”department-info”>
+<!—Department information will be displayed here →
+</article>
+</main>
+<script>
+Function showDepartment(department) {
+// You can replace the following line with an AJAX request to fetch department information from the server
+Const departmentInfo = getDepartmentInfo(department);
+// Display department information in the third frame (article)
+Document.getElementById(‘department-info’).innerHTML = departmentInfo;
+}
+Function getDepartmentInfo(department) {
+// Simulated department information, replace this with actual data
+Const departmentData = {
+Department1: ‘Information for Department 1’,
+Department2: ‘Information for Department 2’,
+Department3: ‘Information for Department 3’,
+// Add more departments as needed
+};
+Return departmentData[department] || ‘Department information not available.’;
+}
+</script>
+</body>
+</html>
+Q2)
+// Product Collection
+[
+{ “product_id”: 101, “product_name”: “Laptop”, “price”: 1000 },
+{ “product_id”: 102, “product_name”: “Smartphone”, “price”: 500 },
+{ “product_id”: 103, “product_name”: “Headphones”, “price”: 100 },
+// ... (additional products)
+]
+// Customer Collection
+[
+{ “customer_id”: 201, “customer_name”: “John Doe” },
+{ “customer_id”: 202, “customer_name”: “Alice Smith” },
+{ “customer_id”: 203, “customer_name”: “Mr. Rajiv” },
+// ... (additional customers)
+]
+// Order Collection
+[
+{ “order_id”: 301, “customer_id”: 201, “products”: [ { “product_id”: 101, “quantity”: 2 }, { “product_id”: 102, “quantity”: 1 } ], “order_value”: 2500, “processed”: true },
+{ “order_id”: 302, “customer_id”: 202, “products”: [ { “product_id”: 103, “quantity”: 3 } ], “order_value”: 300, “processed”: false },
+// ... (additional orders)
+]
+// Invoice Collection
+[
+{ “invoice_id”: 401, “order_id”: 301, “invoice_value”: 2500, “payment_status”: “Paid” },
+// ... (additional invoices)
+]
+a. List all products in the inventory:
+Db.product.find({})
+b. List the details of orders with a value >20000:
+c. List all the orders which have not been processed (invoice not generated):
+Db.order.find({ “processed”: false })
+d. List all the orders along with their invoice for “Mr. Rajiv”:
+Db.order.aggregate([
+{ $match: { “customer_id”: 203 } },
+{ $lookup: { from: “invoice”, localField: “order_id”, foreignField: “order_id”, as: “invoice_info” } },
+{ $unwind: “$invoice_info” },
+{ $project: { “order_id”: 1, “order_value”: 1, “invoice_info.invoice_id”: 1, “invoice_info.invoice_value”: 1, “invoice_info.payment_status”: 1 } }
+])
