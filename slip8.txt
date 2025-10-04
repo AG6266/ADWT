@@ -1,0 +1,60 @@
+Slip 8
+Q1)
+<!DOCTYPE html>
+<html lang=”en”>
+<head>
+<meta charset=”UTF-8”>
+<meta name=”viewport” content=”width=device-width, initial-scale=1.0”>
+<title>Bootstrap Button Styles</title>
+<!—Bootstrap CSS →
+<link href=”path/to/bootstrap.min.css” rel=”stylesheet”>
+</head>
+<body>
+<div class=”container mt-5”>
+<!—Container with margin-top (mt-5) →
+<h2 class=”mb-4”>Bootstrap Button Styles</h2>
+<!—Button Styles →
+<button type=”button” class=”btn btn-secondary mr-2”>Secondary</button>
+<button type=”button” class=”btn btn-primary mr-2”>Primary</button>
+<button type=”button” class=”btn btn-success mr-2”>Success</button>
+<button type=”button” class=”btn btn-danger mr-2”>Danger</button>
+<button type=”button” class=”btn btn-info mr-2”>Info</button>
+<button type=”button” class=”btn btn-warning mr-2”>Warning</button>
+<button type=”button” class=”btn btn-error”>Error</button>
+<!—End of Button Styles →
+</div>
+<!—End of Container →
+<!—Bootstrap JS (Optional, for certain components) →
+<script src=”path/to/bootstrap.bundle.min.js”></script>
+</body>
+</html>
+
+
+Q2)
+// Item Collection
+[
+{ “item_id”: 101, “item_name”: “Laptop”, “tags”: [“Electronics”, “Gadgets”], “status”: “A” },
+{ “item_id”: 102, “item_name”: “Chair”, “tags”: [“Furniture”], “status”: “B” },
+{ “item_id”: 103, “item_name”: “Planner”, “tags”: [“Stationery”], “status”: “C” },
+{ “item_id”: 104, “item_name”: “Camera”, “tags”: [“Electronics”, “Photography”], “status”: “A” },
+{ “item_id”: 105, “item_name”: “Printer”, “tags”: [“Electronics”, “Office”], “status”: “B” }
+]
+// Warehouse Collection
+[
+{ “warehouse_id”: 1, “warehouse_name”: “Main Warehouse”, “items_stock”: [{ “item_id”: 101, “quantity”: 400 }, { “item_id”: 103, “quantity”: 30 }] },
+{ “warehouse_id”: 2, “warehouse_name”: “Secondary Warehouse”, “items_stock”: [{ “item_id”: 102, “quantity”: 100 }, { “item_id”: 105, “quantity”: 15 }] },
+{ “warehouse_id”: 3, “warehouse_name”: “Backup Warehouse”, “items_stock”: [{ “item_id”: 104, “quantity”: 250 }, { “item_id”: 103, “quantity”: 10 }] }
+]
+a. List all the items where quantity is greater than 300:
+Db.warehouse.find({ “items_stock.quantity”: { $gt: 300 } })
+b. List all items which have tags less than 5:
+Db.item.find({ “tags”: { $exists: true, $size: { $lt: 5 } } })
+c. List all items having status equal to “B” or having quantity less than 50 and height of the product should be greater than 8:
+Db.item.find({
+$or: [
+{ “status”: “B” },
+{ $and: [{ “quantity”: { $lt: 50 } }, { “height”: { $gt: 8 } }] }
+]
+})
+d. Find all warehouses that keep the item “Planner” and have in-stock quantity less than 20:
+Db.warehouse.find({ “items_stock”: { $elemMatch: { “item_id”: 103, “quantity”: { $lt: 20 } } } })
