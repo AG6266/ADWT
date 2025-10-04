@@ -1,0 +1,161 @@
+Q1)
+<!DOCTYPE html>
+<html lang=”en”>
+<head>
+<meta charset=”UTF-8”>
+<meta name=”viewport” content=”width=device-width, initial-scale=1.0”>
+<title>Bootstrap Container Example</title>
+<!—Bootstrap CSS →
+<link href=”path/to/bootstrap.min.css” rel=”stylesheet”>
+</head>
+<body>
+<div class=”container mt-5”>
+<!—Container with margin-top (mt-5) →
+<div class=”row”>
+<!—Row inside the container →
+<div class=”col-md-4”>
+<!—First Column (col-md-4) →
+<div class=”card”>
+<div class=”card-body”>
+<h5 class=”card-title”>Column 1</h5>
+<p class=”card-text”>Content for column 1.</p>
+</div>
+</div>
+</div>
+<div class=”col-md-4”>
+<!—Second Column (col-md-4) →
+<div class=”card”>
+<div class=”card-body”>
+<h5 class=”card-title”>Column 2</h5>
+<p class=”card-text”>Content for column 2.</p>
+</div>
+</div>
+</div>
+<div class=”col-md-4”>
+<!—Third Column (col-md-4) →
+<div class=”card”>
+<div class=”card-body”>
+<h5 class=”card-title”>Column 3</h5>
+<p class=”card-text”>Content for column 3.</p>
+</div>
+</div>
+</div>
+</div>
+<!—End of Row →
+</div>
+<!—End of Container →
+<!—Bootstrap JS (Optional, for certain components) →
+<script src=”path/to/bootstrap.bundle.min.js”></script>
+</body>
+</html>
+
+Q2)
+// Newspaper Collection
+[
+{
+“newspaper_id”: 1,
+“name”: “Times of India”,
+“language”: “English”,
+“publisher_id”: 101,
+“city”: “Mumbai”,
+“state”: “Maharashtra”,
+“sale_count”: 50000
+},
+{
+“newspaper_id”: 2,
+“name”: “Lokmat”,
+“language”: “Marathi”,
+“publisher_id”: 102,
+“city”: “Nashik”,
+“state”: “Maharashtra”,
+“sale_count”: 30000
+},
+{
+“newspaper_id”: 3,
+“name”: “Gujarat Samachar”,
+“language”: “Gujarati”,
+“publisher_id”: 103,
+“city”: “Ahmedabad”,
+“state”: “Gujarat”,
+“sale_count”: 45000
+},
+{
+“newspaper_id”: 4,
+“name”: “Pune Mirror”,
+“language”: “English”,
+“publisher_id”: 104,
+“city”: “Pune”,
+“state”: “Maharashtra”,
+“sale_count”: 25000
+},
+{
+“newspaper_id”: 5,
+“name”: “Nagpur Times”,
+“language”: “English”,
+“publisher_id”: 105,
+“city”: “Nagpur”,
+“state”: “Maharashtra”,
+“sale_count”: 20000
+}
+]
+// Publisher Collection
+[
+{
+“publisher_id”: 101,
+“name”: “Bennett, Coleman & Co. Ltd.”
+},
+{
+“publisher_id”: 102,
+“name”: “Lokmat Media Pvt. Ltd.”
+},
+{
+“publisher_id”: 103,
+“name”: “Gujarat Samachar Pvt. Ltd.”
+},
+{
+“publisher_id”: 104,
+“name”: “The Indian Express Group”
+},
+{
+“publisher_id”: 105,
+“name”: “Times Group”
+}
+]
+// City Collection
+[
+{
+“city”: “Mumbai”,
+“state”: “Maharashtra”
+},
+{
+“city”: “Nashik”,
+“state”: “Maharashtra”
+},
+{
+“city”: “Ahmedabad”,
+“state”: “Gujarat”
+},
+{
+“city”: “Pune”,
+“state”: “Maharashtra”
+},
+{
+“city”: “Nagpur”,
+“state”: “Maharashtra”
+}
+]
+
+a. List all newspapers available in “NASHIK” city:
+Db.newspaper.find({ city: “Nashik” })
+
+b. List all newspapers of “Marathi” language:
+Db.newspaper.find({ language: “Marathi” })
+
+c. Count the number of publishers in “Gujarat” state:
+Db.publisher.find({ _id: { $in: db.newspaper.distinct(“publisher_id”, { “city”: “Ahmedabad” }) } }).count()
+
+d. Write a cursor to show newspapers with the highest sale in Maharashtra state:
+Var cursor = db.newspaper.find({ state: “Maharashtra” }).sort({ sale_count: -1 });
+While (cursor.hasNext()) {
+Printjson(cursor.next());
+}
