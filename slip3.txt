@@ -1,0 +1,125 @@
+Q1)
+<!DOCTYPE html>
+<html lang=”en”>
+<head>
+<meta charset=”UTF-8”>
+<meta name=”viewport” content=”width=device-width, initial-scale=1, shrink-to-fit=no”>
+<link rel=”stylesheet” href=https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css>
+<title>Image Thumbnails</title>
+</head>
+<body>
+<div class=”container mt-5”>
+<h2 class=”mb-4”>Image Thumbnails</h2>
+<div class=”row”>
+<!—Image 1 →
+<div class=”col-md-4”>
+<div class=”thumbnail”>
+<img src=”path/to/image1.jpg” alt=”Image 1” class=”img-fluid”>
+<div class=”caption”>
+<h4>Image 1</h4>
+</div>
+</div>
+</div>
+<!—Image 2 →
+<div class=”col-md-4”>
+<div class=”thumbnail”>
+<img src=”path/to/image2.jpg” alt=”Image 2” class=”img-fluid”>
+<div class=”caption”>
+<h4>Image 2</h4>
+</div>
+</div>
+</div>
+<!—Image 3 →
+<div class=”col-md-4”>
+<div class=”thumbnail”>
+<img src=”path/to/image3.jpg” alt=”Image 3” class=”img-fluid”>
+<div class=”caption”>
+<h4>Image 3</h4>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!—Bootstrap JS and Popper.js (optional) →
+<script src=https://code.jquery.com/jquery-3.5.1.slim.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js></script>
+<script src=https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js></script>
+</body>
+</html>
+
+Q2)
+// Employee Collection
+[
+{
+“employee_id”: 1,
+“name”: “John Doe”,
+“salary”: 75000,
+“department_id”: 101
+},
+{
+“employee_id”: 2,
+“name”: “Jane Smith”,
+“salary”: 80000,
+“department_id”: 102
+},
+{
+“employee_id”: 3,
+“name”: “Bob Johnson”,
+“salary”: 70000,
+“department_id”: 103
+},
+{
+“employee_id”: 4,
+“name”: “Alice Brown”,
+“salary”: 85000,
+“department_id”: 101
+},
+{
+“employee_id”: 5,
+“name”: “Chris Williams”,
+“salary”: 90000,
+“department_id”: 102
+}
+]
+// Department Collection
+[
+{
+“department_id”: 101,
+“name”: “Sales”,
+“employees”: 2
+},
+{
+“department_id”: 102,
+“name”: “Marketing”,
+“employees”: 2
+},
+{
+“department_id”: 103,
+“name”: “Engineering”,
+“employees”: 1
+},
+{
+“department_id”: 104,
+“name”: “Finance”,
+“employees”: 0
+}
+]
+a. Display the name of the employee who has the highest salary:
+Db.employee.find().sort({ salary: -1 }).limit(1).project({ _id: 0, name: 1 })
+
+b. Display the biggest department with the maximum number of employees:
+Db.department.find().sort({ employees: -1 }).limit(1)
+
+c. Write a cursor which shows department-wise employee information:
+Var cursor = db.department.find();
+While (cursor.hasNext()) {
+Var department = cursor.next();
+Print(“Department: “ + department.name);
+Var employees = db.employee.find({ department_id: department.department_id });
+While (employees.hasNext()) {
+Printjson(employees.next());
+}
+Print(“------------“);
+}
+d. List all the employees who work in the Sales department and have a salary greater than 50000:
+Db.employee.find({ department_id: 101, salary: { $gt: 50000 } })
