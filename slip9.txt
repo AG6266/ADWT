@@ -1,0 +1,110 @@
+Slip 9
+Q1)
+<!DOCTYPE html>
+<html lang=”en”>
+<head>
+<meta charset=”UTF-8”>
+<meta name=”viewport” content=”width=device-width, initial-scale=1.0”>
+<title>Student Registration Form</title>
+<style>
+Body {
+Font-family: Arial, sans-serif;
+Background-color: #f4f4f4;
+Margin: 20px;
+}
+Form {
+Max-width: 600px;
+Margin: 0 auto;
+Background-color: #fff;
+Padding: 20px;
+Border-radius: 8px;
+Box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+Label {
+Display: block;
+Margin-bottom: 8px;
+Font-weight: bold;
+}
+Input, select {
+Width: 100%;
+Padding: 10px;
+Margin-bottom: 16px;
+Border: 1px solid #ccc;
+Border-radius: 4px;
+Box-sizing: border-box;
+}
+Input[type=”submit”] {
+Background-color: #4caf50;
+Color: #fff;
+Cursor: pointer;
+}
+Input[type=”submit”]:hover {
+Background-color: #45a049;
+}
+</style>
+</head>
+<body>
+<form action=”#” method=”post”>
+<h2>Student Registration Form</h2>
+<label for=”fullName”>Full Name:</label>
+<input type=”text” id=”fullName” name=”fullName” required>
+<label for=”email”>Email:</label>
+<input type=”email” id=”email” name=”email” required>
+<label for=”dateOfBirth”>Date of Birth:</label>
+<input type=”date” id=”dateOfBirth” name=”dateOfBirth” required>
+<label for=”gender”>Gender:</label>
+<select id=”gender” name=”gender” required>
+<option value=”male”>Male</option>
+<option value=”female”>Female</option>
+<option value=”other”>Other</option>
+</select>
+<label for=”course”>Select Course:</label>
+<select id=”course” name=”course” required>
+<option value=”computerScience”>Computer Science</option>
+<option value=”engineering”>Engineering</option>
+<option value=”biology”>Biology</option>
+<!—Add more options as needed →
+</select>
+<label for=”searchCollege”>Search for College:</label>
+<input type=”search” id=”searchCollege” name=”searchCollege”>
+<label for=”comments”>Additional Comments:</label>
+<textarea id=”comments” name=”comments” rows=”4”></textarea>
+<input type=”submit” value=”Submit”>
+</form>
+</body>
+</html>
+
+
+Q2)
+// Customer Collection
+[
+{ “customer_id”: 101, “customer_name”: “John Doe”, “address”: “Main St, Pune” },
+{ “customer_id”: 102, “customer_name”: “Alice Smith”, “address”: “Park St, Pimpri” },
+{ “customer_id”: 103, “customer_name”: “Mr. Patil”, “address”: “Hill St, Pimpri” },
+// ... (additional customers)
+]
+// Loan Collection
+[
+{ “loan_id”: 201, “customer_id”: 101, “city”: “Pune”, “loan_type”: “Personal Loan”, “loan_amt”: 50000 },
+{ “loan_id”: 202, “customer_id”: 102, “city”: “Pimpri”, “loan_type”: “Home Loan”, “loan_amt”: 150000 },
+{ “loan_id”: 203, “customer_id”: 103, “city”: “Pimpri”, “loan_type”: “Car Loan”, “loan_amt”: 120000 },
+// ... (additional loans)
+]
+a. List all customers whose name starts with ‘D’ character:
+Db.customer.find({ “customer_name”: /^D/i })
+b. List the names of customers in descending order who have taken a loan from Pimpri city:
+Db.customer.find({ “address”: /Pimpri/i }).sort({ “customer_name”: -1 })
+c. Display customer details having the maximum loan amount:
+Var maxLoanAmount = db.loan.find().sort({ “loan_amt”: -1 }).limit(1).next().loan_amt;
+Db.loan.aggregate([
+{ $match: { “loan_amt”: maxLoanAmount } },
+{ $lookup: { from: “customer”, localField: “customer_id”, foreignField: “customer_id”, as: “customer_info” } },
+{ $unwind: “$customer_info” },
+{ $project: { “customer_info.customer_id”: 1, “customer_info.customer_name”: 1, “customer_info.address”: 1, “loan_type”: 1, “loan_amt”: 1 } }
+])
+d. Update the address of the customer whose name is “Mr. Patil” and loan_amt is greater than 100000:
+Db.customer.update(
+{ “customer_name”: “Mr. Patil”, “customer_id”: { $in: db.loan.find({ “loan_amt”: { $gt: 100000 } }).distinct(“customer_id”) } },
+{ $set: { “address”: “New Address” } },
+{ multi: true }
+)
