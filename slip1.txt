@@ -40,69 +40,31 @@ Background-color: lightblue;
 
 
 Q2)
-// Property Collection
-[
-{
-“property_id”: 1,
-“area”: “Mumbai”,
-“rate”: 120000,
-“owner_id”: 101
-},
-{
-“property_id”: 2,
-“area”: “Nashik”,
-“rate”: 95000,
-“owner_id”: 102
-},
-{
-“property_id”: 3,
-“area”: “Pune”,
-“rate”: 105000,
-“owner_id”: 103
-},
-{
-“property_id”: 4,
-“area”: “Mumbai”,
-“rate”: 80000,
-“owner_id”: 104
-},
-{
-“property_id”: 5,
-“area”: “Nashik”,
-“rate”: 90000,
-“owner_id”: 105
-}
-]
-// Owner Collection
-[
-{
-“owner_id”: 101,
-“name”: “Mr. Gupta”
-},
-{
-“owner_id”: 102,
-“name”: “Mr. Patil”
-},
-{
-“owner_id”: 103,
-“name”: “Mrs. Deshmukh”
-},
-{
-“owner_id”: 104,
-“name”: “Mr. Shah”
-},
-{
-“owner_id”: 105,
-“name”: “Mr. Patil”
-}
-]
+use propertyDB
+db.owners.insertMany([
+{"_id":"patil","name":"Mr. Patil","phone":"9876543210","address":"Nashik"},
+{"_id":"rao","name":"Mr. Rao","phone":"9123456780","address":"Pune"},
+{"_id":"singh","name":"Mr. Singh","phone":"9012345678","address":"Mumbai"},
+{"_id":"desai","name":"Mr. Desai","phone":"9001234567","address":"Nashik"},
+{"_id":"kumar","name":"Mr. Kumar","phone":"9898989898","address":"Aurangabad"}
+])
+db.properties.insertMany([
+{"pid":1,"owner_id":"patil","area":"Nashik","rate":85000},
+{"pid":2,"owner_id":"patil","area":"Pune","rate":125000},
+{"pid":3,"owner_id":"rao","area":"Mumbai","rate":95000},
+{"pid":4,"owner_id":"desai","area":"Nashik","rate":75000},
+{"pid":5,"owner_id":"kumar","area":"Aurangabad","rate":45000}
+])
+
 a. Display area-wise property details:
-Db.property.find({}, { _id: 0, area: 1, rate: 1 })
+db.properties.aggregate([{$group:{_id:'$area', properties:{$push:'$$ROOT'}}}])
+
 b. Display property owned by ‘Mr. Patil’ having the minimum rate:
-Db.property.find({ owner_id: db.owner.findOne({ name: “Mr. Patil” }).owner_id })
-.sort({ rate: 1 })
-.limit(1)
+db.properties.find({owner_id:'patil'}).sort({rate:1}).limit(1)
+
+
 c. Give the details of the owner whose property is at “Nashik”:
-Db.owner.findOne({ owner_id: db.property.findOne({ area: “Nashik” }).owner_id })
+db.owners.findOne({address:'Nashik'})
+
 d. Display the area of the property whose rate is less than 100000:
-Db.property.find({ rate: { $lt: 100000 } }, { _id: 0, area: 1 })
+db.properties.find({rate:{$lt:100000}})
