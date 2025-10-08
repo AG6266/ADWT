@@ -50,112 +50,55 @@ Q1)
 </html>
 
 Q2)
-// Newspaper Collection
-[
-{
-“newspaper_id”: 1,
-“name”: “Times of India”,
-“language”: “English”,
-“publisher_id”: 101,
-“city”: “Mumbai”,
-“state”: “Maharashtra”,
-“sale_count”: 50000
-},
-{
-“newspaper_id”: 2,
-“name”: “Lokmat”,
-“language”: “Marathi”,
-“publisher_id”: 102,
-“city”: “Nashik”,
-“state”: “Maharashtra”,
-“sale_count”: 30000
-},
-{
-“newspaper_id”: 3,
-“name”: “Gujarat Samachar”,
-“language”: “Gujarati”,
-“publisher_id”: 103,
-“city”: “Ahmedabad”,
-“state”: “Gujarat”,
-“sale_count”: 45000
-},
-{
-“newspaper_id”: 4,
-“name”: “Pune Mirror”,
-“language”: “English”,
-“publisher_id”: 104,
-“city”: “Pune”,
-“state”: “Maharashtra”,
-“sale_count”: 25000
-},
-{
-“newspaper_id”: 5,
-“name”: “Nagpur Times”,
-“language”: “English”,
-“publisher_id”: 105,
-“city”: “Nagpur”,
-“state”: “Maharashtra”,
-“sale_count”: 20000
-}
-]
-// Publisher Collection
-[
-{
-“publisher_id”: 101,
-“name”: “Bennett, Coleman & Co. Ltd.”
-},
-{
-“publisher_id”: 102,
-“name”: “Lokmat Media Pvt. Ltd.”
-},
-{
-“publisher_id”: 103,
-“name”: “Gujarat Samachar Pvt. Ltd.”
-},
-{
-“publisher_id”: 104,
-“name”: “The Indian Express Group”
-},
-{
-“publisher_id”: 105,
-“name”: “Times Group”
-}
-]
-// City Collection
-[
-{
-“city”: “Mumbai”,
-“state”: “Maharashtra”
-},
-{
-“city”: “Nashik”,
-“state”: “Maharashtra”
-},
-{
-“city”: “Ahmedabad”,
-“state”: “Gujarat”
-},
-{
-“city”: “Pune”,
-“state”: “Maharashtra”
-},
-{
-“city”: “Nagpur”,
-“state”: “Maharashtra”
-}
-]
+db.cities.insertMany([
+  { _id: 1, name: "Mumbai", state: "Maharashtra" },
+  { _id: 2, name: "Nashik", state: "Maharashtra" },
+  { _id: 3, name: "Pune", state: "Maharashtra" },
+  { _id: 4, name: "Ahmedabad", state: "Gujarat" },
+  { _id: 5, name: "Surat", state: "Gujarat" }
+])
+
+
+db.publishers.insertMany([
+  { _id: 1, name: "Lokmat Group", city_id: 1 },
+  { _id: 2, name: "Sakal Media", city_id: 2 },
+  { _id: 3, name: "Divya Bhaskar", city_id: 4 },
+  { _id: 4, name: "Sandesh Ltd", city_id: 5 },
+  { _id: 5, name: "Pudhari Pvt Ltd", city_id: 3 }
+])
+
+
+db.newspapers.insertMany([
+  { name: "Lokmat", language: "Marathi", publisher_id: 1, city_id: 1, sale: 50000 },
+  { name: "Sakal", language: "Marathi", publisher_id: 2, city_id: 2, sale: 40000 },
+  { name: "Divya Bhaskar", language: "Gujarati", publisher_id: 3, city_id: 4, sale: 60000 },
+  { name: "Sandesh", language: "Gujarati", publisher_id: 4, city_id: 5, sale: 55000 },
+  { name: "Pudhari", language: "Marathi", publisher_id: 5, city_id: 3, sale: 30000 }
+])
+
+
+
 
 a. List all newspapers available in “NASHIK” city:
-Db.newspaper.find({ city: “Nashik” })
+const city = db.cities.findOne({ name: "Nashik" })
+
+
 
 b. List all newspapers of “Marathi” language:
-Db.newspaper.find({ language: “Marathi” })
+db.newspapers.find({ language: "Marathi" })
 
 c. Count the number of publishers in “Gujarat” state:
-Db.publisher.find({ _id: { $in: db.newspaper.distinct(“publisher_id”, { “city”: “Ahmedabad” }) } }).count()
+const gujaratCities = db.cities.find({ state: "Gujarat" }).map(city => city._id)
+db.publishers.countDocuments({ city_id: { $in: gujaratCities } })
 
 d. Write a cursor to show newspapers with the highest sale in Maharashtra state:
-Var cursor = db.newspaper.find({ state: “Maharashtra” }).sort({ sale_count: -1 });
-While (cursor.hasNext()) {
-Printjson(cursor.next());
+const maharashtraCities = db.cities.find({ state: "Maharashtra" }).map(city => city._id)
+
+const cursor = db.newspapers.find({
+  city_id: { $in: maharashtraCities }
+}).sort({ sale: -1 })
+
+while (cursor.hasNext()) {
+  printjson(cursor.next())
 }
+
