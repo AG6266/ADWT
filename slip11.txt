@@ -78,40 +78,130 @@ Return departmentData[department] || ‘Department information not available.’
 </body>
 </html>
 Q2)
-// Product Collection
-[
-{ “product_id”: 101, “product_name”: “Laptop”, “price”: 1000 },
-{ “product_id”: 102, “product_name”: “Smartphone”, “price”: 500 },
-{ “product_id”: 103, “product_name”: “Headphones”, “price”: 100 },
-// ... (additional products)
-]
-// Customer Collection
-[
-{ “customer_id”: 201, “customer_name”: “John Doe” },
-{ “customer_id”: 202, “customer_name”: “Alice Smith” },
-{ “customer_id”: 203, “customer_name”: “Mr. Rajiv” },
-// ... (additional customers)
-]
-// Order Collection
-[
-{ “order_id”: 301, “customer_id”: 201, “products”: [ { “product_id”: 101, “quantity”: 2 }, { “product_id”: 102, “quantity”: 1 } ], “order_value”: 2500, “processed”: true },
-{ “order_id”: 302, “customer_id”: 202, “products”: [ { “product_id”: 103, “quantity”: 3 } ], “order_value”: 300, “processed”: false },
-// ... (additional orders)
-]
-// Invoice Collection
-[
-{ “invoice_id”: 401, “order_id”: 301, “invoice_value”: 2500, “payment_status”: “Paid” },
-// ... (additional invoices)
-]
+
+db.createCollection("products")
+db.createCollection("customers")
+db.createCollection("orders")
+db.createCollection("invoices")
+
+
+db.products.insertMany([
+  { _id: 101, name: "Laptop", category: "Electronics", price: 50000, stock: 10 },
+  { _id: 102, name: "Phone", category: "Electronics", price: 30000, stock: 20 },
+  { _id: 103, name: "Desk", category: "Furniture", price: 7000, stock: 15 },
+  { _id: 104, name: "Chair", category: "Furniture", price: 4000, stock: 25 },
+  { _id: 105, name: "Headphones", category: "Accessories", price: 2000, stock: 50 }
+])
+
+db.customers.insertMany([
+  { _id: 201, name: "Mr. Rajiv", email: "rajiv@example.com", phone: "9999999999", address: "Delhi" },
+  { _id: 202, name: "Ms. Priya", email: "priya@example.com", phone: "8888888888", address: "Mumbai" },
+  { _id: 203, name: "Mr. Arjun", email: "arjun@example.com", phone: "7777777777", address: "Pune" },
+  { _id: 204, name: "Ms. Neha", email: "neha@example.com", phone: "6666666666", address: "Bangalore" },
+  { _id: 205, name: "Mr. Aman", email: "aman@example.com", phone: "5555555555", address: "Hyderabad" }
+])
+
+db.orders.insertMany([
+  {
+    _id: 301,
+    customer_id: 201,
+    order_date: ISODate("2025-10-01"),
+    items: [
+      { product_id: 101, quantity: 1 },
+      { product_id: 105, quantity: 2 }
+    ],
+    total_amount: 54000,
+    processed: true
+  },
+  {
+    _id: 302,
+    customer_id: 202,
+    order_date: ISODate("2025-10-02"),
+    items: [
+      { product_id: 102, quantity: 1 }
+    ],
+    total_amount: 30000,
+    processed: false
+  },
+  {
+    _id: 303,
+    customer_id: 203,
+    order_date: ISODate("2025-10-03"),
+    items: [
+      { product_id: 104, quantity: 5 }
+    ],
+    total_amount: 20000,
+    processed: true
+  },
+  {
+    _id: 304,
+    customer_id: 204,
+    order_date: ISODate("2025-10-04"),
+    items: [
+      { product_id: 103, quantity: 3 }
+    ],
+    total_amount: 21000,
+    processed: false
+  },
+  {
+    _id: 305,
+    customer_id: 205,
+    order_date: ISODate("2025-10-05"),
+    items: [
+      { product_id: 102, quantity: 2 }
+    ],
+    total_amount: 60000,
+    processed: true
+  }
+])
+
+db.invoices.insertMany([
+  {
+    _id: 401,
+    order_id: 301,
+    invoice_date: ISODate("2025-10-01"),
+    payment_method: "Credit Card",
+    status: "Paid"
+  },
+  {
+    _id: 402,
+    order_id: 303,
+    invoice_date: ISODate("2025-10-03"),
+    payment_method: "UPI",
+    status: "Paid"
+  },
+  {
+    _id: 403,
+    order_id: 305,
+    invoice_date: ISODate("2025-10-05"),
+    payment_method: "Cash",
+    status: "Pending"
+  }
+])
+
+
+
+
+
 a. List all products in the inventory:
-Db.product.find({})
+db.products.find()
+
 b. List the details of orders with a value >20000:
+db.orders.find({ total_amount: { $gt: 20000 } })
+
 c. List all the orders which have not been processed (invoice not generated):
-Db.order.find({ “processed”: false })
+db.orders.find({ processed: false })
+
+
 d. List all the orders along with their invoice for “Mr. Rajiv”:
-Db.order.aggregate([
-{ $match: { “customer_id”: 203 } },
-{ $lookup: { from: “invoice”, localField: “order_id”, foreignField: “order_id”, as: “invoice_info” } },
-{ $unwind: “$invoice_info” },
-{ $project: { “order_id”: 1, “order_value”: 1, “invoice_info.invoice_id”: 1, “invoice_info.invoice_value”: 1, “invoice_info.payment_status”: 1 } }
+db.orders.aggregate([
+  { $match: { customer_id: 201 } },
+  {
+    $lookup: {
+      from: "invoices",
+      localField: "_id",
+      foreignField: "order_id",
+      as: "invoice"
+    }
+  }
 ])
