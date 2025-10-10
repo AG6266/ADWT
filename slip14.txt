@@ -103,17 +103,21 @@ CREATE (s)-[:BENEFITS]->(sch);
 MATCH (s1:Student {name: “John Doe”}), (s2:Student {name: “Alice Smith”})
 CREATE (s1)-[:RECOMMENDS]->(s2);
 a. List the names of scholarships for the OBC category:
-MATCH (sch:Scholarship)-[:FOR_CATEGORY]->(cat:Category {name: “OBC”})
+MATCH (sch:Scholarship)-[:FOR_CATEGORY]->(cat:Category {name:"OBC"})
 RETURN sch.name;
+
 b. Count the number of students benefitted by a specific scholarship in the year 2020-2021 (assumed from the question context):
 MATCH (s:Student)-[:BENEFITS]->(sch:Scholarship {name: “Merit Scholarship”})
 WHERE s.income <= sch.income_limit
 RETURN COUNT(s) AS numberOfStudents;
+
 c. Update the income limit for a specific scholarship:
-MATCH (sch:Scholarship {name: “Merit Scholarship”})
-SET sch.income_limit = 60000;
+MATCH (sch:Scholarship {name:"Merit Scholarship"})
+SET sch.income_limit = 60000
+RETURN sch;
+
 d. List the most popular scholarship (assumed based on the number of students benefitted):
-MATCH (sch:Scholarship)
-RETURN sch.name, SIZE((:Student)-[:BENEFITS]->(sch)) AS popularity
+MATCH (s:Student)-[:BENEFITS]->(sch:Scholarship)
+RETURN sch.name, COUNT(s) AS popularity
 ORDER BY popularity DESC
 LIMIT 1;
