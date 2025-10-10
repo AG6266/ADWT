@@ -81,40 +81,137 @@ Background-color: #f44336;
 </body>
 </html>
 Q2)
-// Movie Collection
-[
-{ “movie_id”: 101, “movie_name”: “Inception”, “budget”: 200000000, “release_year”: 2010, “producers”: [ “Christopher Nolan”, “Emma Thomas” ], “actors”: [ { “actor_name”: “Leonardo DiCaprio”, “role”: “Cobb” }, { “actor_name”: “Joseph Gordon-Levitt”, “role”: “Arthur” } ] },
-{ “movie_id”: 102, “movie_name”: “The Dark Knight”, “budget”: 250000000, “release_year”: 2008, “producers”: [ “Christopher Nolan”, “Emma Thomas” ], “actors”: [ { “actor_name”: “Christian Bale”, “role”: “Bruce Wayne” }, { “actor_name”: “Heath Ledger”, “role”: “Joker” } ] },
-// ... (additional movies)
-]
-// Producer Collection
-[
-{ “producer_name”: “Christopher Nolan”, “produced_movies”: [ { “movie_id”: 101, “movie_name”: “Inception” }, { “movie_id”: 102, “movie_name”: “The Dark Knight” } ] },
-{ “producer_name”: “Emma Thomas”, “produced_movies”: [ { “movie_id”: 101, “movie_name”: “Inception” }, { “movie_id”: 102, “movie_name”: “The Dark Knight” } ] },
-// ... (additional producers)
-]
-// Actor Collection
-[
-{ “actor_name”: “Leonardo DiCaprio”, “acted_movies”: [ { “movie_id”: 101, “movie_name”: “Inception” } ] },
-{ “actor_name”: “Joseph Gordon-Levitt”, “acted_movies”: [ { “movie_id”: 101, “movie_name”: “Inception” } ] },
-{ “actor_name”: “Christian Bale”, “acted_movies”: [ { “movie_id”: 102, “movie_name”: “The Dark Knight” } ] },
-// ... (additional actors)
-]
-a. List the names of movies with the highest budget:
-Db.movie.find({}, { “_id”: 0, “movie_name”: 1, “budget”: 1 }).sort({ “budget”: -1 }).limit(1)
-b. Display the details of producers who have produced more than one movie in a year:
-Db.producer.aggregate([
-{ $unwind: “$produced_movies” },
-{ $group: { “_id”: { “producer_name”: “$producer_name”, “release_year”: “$produced_movies.release_year” }, “count”: { $sum: 1 } } },
-{ $match: { “count”: { $gt: 1 } } },
-{ $project: { “_id”: 0, “producer_name”: “$_id.producer_name”, “release_year”: “$_id.release_year”, “count”: 1 } }
+
+
+db.createCollection("actors")
+db.createCollection("producers")
+db.createCollection("movies")
+
+db.actors.insertMany([
+  { _id: 1, name: "Akshay", dob: ISODate("1967-09-09"), nationality: "Indian" },
+  { _id: 2, name: "Salman", dob: ISODate("1965-12-27"), nationality: "Indian" },
+  { _id: 3, name: "Katrina", dob: ISODate("1983-07-16"), nationality: "British-Indian" },
+  { _id: 4, name: "Ranbir", dob: ISODate("1982-09-28"), nationality: "Indian" },
+  { _id: 5, name: "Deepika", dob: ISODate("1986-01-05"), nationality: "Indian" }
 ])
+
+
+db.producers.insertMany([
+  { _id: 101, name: "Karan Johar", company: "Dharma Productions", country: "India" },
+  { _id: 102, name: "Aditya Chopra", company: "YRF", country: "India" },
+  { _id: 103, name: "Sajid Nadiadwala", company: "NGE", country: "India" },
+  { _id: 104, name: "Rohit Shetty", company: "RS Films", country: "India" },
+  { _id: 105, name: "Farhan Akhtar", company: "Excel Entertainment", country: "India" }
+])
+
+db.movies.insertMany([
+  {
+    _id: 201,
+    title: "Action Blast",
+    release_year: 2023,
+    budget: 200,
+    producers: [101, 103],
+    cast: [
+      { actor_id: 1, role: "Hero" },
+      { actor_id: 3, role: "Heroine" }
+    ]
+  },
+  {
+    _id: 202,
+    title: "Romantic Saga",
+    release_year: 2023,
+    budget: 150,
+    producers: [102],
+    cast: [
+      { actor_id: 2, role: "Hero" },
+      { actor_id: 5, role: "Heroine" }
+    ]
+  },
+  {
+    _id: 203,
+    title: "Comedy Nights",
+    release_year: 2024,
+    budget: 180,
+    producers: [104, 105],
+    cast: [
+      { actor_id: 1, role: "Comedian" },
+      { actor_id: 4, role: "Friend" }
+    ]
+  },
+  {
+    _id: 204,
+    title: "Thriller Chase",
+    release_year: 2024,
+    budget: 220,
+    producers: [101],
+    cast: [
+      { actor_id: 3, role: "Detective" },
+      { actor_id: 5, role: "Villain" }
+    ]
+  },
+  {
+    _id: 205,
+    title: "Family Drama",
+    release_year: 2023,
+    budget: 220,
+    producers: [102, 103],
+    cast: [
+      { actor_id: 1, role: "Father" },
+      { actor_id: 2, role: "Son" },
+      { actor_id: 5, role: "Mother" }
+    ]
+  }
+])
+
+
+
+
+
+a. List the names of movies with the highest budget:
+db.movies.find(
+  { budget: db.movies.find().sort({ budget: -1 }).limit(1).toArray()[0].budget },
+  { title: 1, _id: 0 }
+)
+
+
+b. Display the details of producers who have produced more than one movie in a year:
+db.movies.aggregate([
+  { $unwind: "$producers" },
+  { $group: { _id: { producer: "$producers", year: "$release_year" }, movie_count: { $sum: 1 } } },
+  { $match: { movie_count: { $gt: 1 } } },
+  { $lookup: {
+      from: "producers",
+      localField: "_id.producer",
+      foreignField: "_id",
+      as: "producer_details"
+  }},
+  { $unwind: "$producer_details" },
+  { $project: { _id: 0, producer: "$producer_details.name", year: "$_id.year", movies_produced: "$movie_count" } }
+])
+
+
 c. List the names of actors who have acted in at least one movie in which ‘Akshay’ has acted:
-Var akshayMovies = db.actor.find({ “acted_movies.actor_name”: “Akshay” }, { “_id”: 0, “acted_movies.movie_name”: 1 }).map(function(actor) {
-Return actor.acted_movies.map(function(movie) {
-Return movie.movie_name;
-});
-}).flat();
-Db.actor.find({ “acted_movies.movie_name”: { $in: akshayMovies } }, { “_id”: 0, “actor_name”: 1 })
+// Step 1:Find movies where Akshay (actor_id: 1) acted
+const akshayMovies = db.movies.find({ "cast.actor_id": 1 }, { _id: 1 }).toArray().map(m => m._id)
+
+// Step 2: Find all actors in those movies (excluding Akshay)
+db.movies.aggregate([
+  { $match: { _id: { $in: akshayMovies } } },
+  { $unwind: "$cast" },
+  { $match: { "cast.actor_id": { $ne: 1 } } },
+  { $lookup: {
+      from: "actors",
+      localField: "cast.actor_id",
+      foreignField: "_id",
+      as: "actor_details"
+  }},
+  { $unwind: "$actor_details" },
+  { $group: { _id: "$actor_details.name" } }
+])
+
+
 d. List the names of movies produced by more than one producer:
-Db.movie.find({ “producers”: { $size: { $gt: 1 } } }, { “_id”: 0, “movie_name”: 1 })
+db.movies.find(
+  { $expr: { $gt: [ { $size: "$producers" }, 1 ] } },
+  { title: 1, _id: 0 }
+)
