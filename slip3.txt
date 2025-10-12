@@ -48,73 +48,76 @@ Q1)
 </html>
 
 Q2)
+
+// Create departments collection
+db.createCollection("departments");
+
+// Create employees collection
+db.createCollection("employees");
+
 db.departments.insertMany([
-  { _id: 1, name: "Sales" },
-  { _id: 2, name: "HR" },
-  { _id: 3, name: "IT" },
-  { _id: 4, name: "Marketing" },
-  { _id: 5, name: "Finance" }
-])
+  { _id: 1, name: "HR", location: "Pune" },
+  { _id: 2, name: "Sales", location: "Mumbai" },
+  { _id: 3, name: "IT", location: "Bangalore" },
+  { _id: 4, name: "Finance", location: "Delhi" },
+  { _id: 5, name: "Marketing", location: "Chennai" }
+]);
+
+
+
 
 db.employees.insertMany([
-  { name: "John", salary: 60000, department_id: 1 },
-  { name: "Asha", salary: 75000, department_id: 3 },
-  { name: "Rahul", salary: 50000, department_id: 1 },
-  { name: "Priya", salary: 80000, department_id: 5 },
-  { name: "Kiran", salary: 55000, department_id: 1 },
-  { name: "Meena", salary: 70000, department_id: 2 },
-  { name: "Vikas", salary: 72000, department_id: 4 },
-  { name: "Sana", salary: 65000, department_id: 3 }
-])
-
-
-
+  { _id: 1, name: "John", salary: 60000, dept_id: 2 },
+  { _id: 2, name: "Samantha", salary: 75000, dept_id: 3 },
+  { _id: 3, name: "Raj", salary: 55000, dept_id: 2 },
+  { _id: 4, name: "Priya", salary: 80000, dept_id: 4 },
+  { _id: 5, name: "Amit", salary: 45000, dept_id: 1 },
+  { _id: 6, name: "Neha", salary: 52000, dept_id: 2 },
+  { _id: 7, name: "Vikram", salary: 70000, dept_id: 5 }
+]);
 
 a. Display the name of the employee who has the highest salary:
-db.employees.find().sort({ salary: -1 }).limit(1)
+db.employees.find().sort({ salary: -1 }).limit(1).project({ name: 1, _id: 0 });
+
 
 b. Display the biggest department with the maximum number of employees:
 db.employees.aggregate([
-  {
-    $group: {
-      _id: "$department_id",
-      emp_count: { $sum: 1 }
-    }
-  },
-  { $sort: { emp_count: -1 } },
+  { $group: { _id: "$dept_id", empCount: { $sum: 1 } } },
+  { $sort: { empCount: -1 } },
   { $limit: 1 },
   {
     $lookup: {
       from: "departments",
       localField: "_id",
       foreignField: "_id",
-      as: "department_info"
+      as: "department"
     }
   },
-  {
-    $project: {
-      _id: 0,
-      department: { $arrayElemAt: ["$department_info.name", 0] },
-      emp_count: 1
-    }
-  }
-])
+  { $unwind: "$department" },
+  { $project: { _id: 0, department: "$department.name", empCount: 1 } }
+]);
+
 
 
 c. Write a cursor which shows department-wise employee information:
-const cursor = db.departments.find()
+var cursor = db.departments.aggregate([
+  {
+    $lookup: {
+      from: "employees",
+      localField: "_id",
+      foreignField: "dept_id",
+      as: "employees"
+    }
+  },
+  { $project: { _id: 0, Department: "$name", Employees: "$employees.name" } }
+]);
 
-while (cursor.hasNext()) {
-  const dept = cursor.next()
-  print("Department: " + dept.name)
-  const employees = db.employees.find({ department_id: dept._id })
-  while (employees.hasNext()) {
-    printjson(employees.next())
-  }
-  print("---------------")
-}
+cursor.forEach(printjson);
+
 
 
 d. List all the employees who work in the Sales department and have a salary greater than 50000:
-const salesDept = db.departments.findOne({ name: "Sales" })
-db.employees.find({ department_id: salesDept._id, salary: { $gt: 50000 } })
+db.employees.find(
+  { dept_id: salesDept._id, salary: { $gt: 50000 } },
+  { _id: 0, name: 1, salary: 1 }
+);
