@@ -31,30 +31,71 @@ Q1)
 
 
 Q2)
-// Item Collection
-[
-{ “item_id”: 101, “item_name”: “Laptop”, “tags”: [“Electronics”, “Gadgets”], “status”: “A” },
-{ “item_id”: 102, “item_name”: “Chair”, “tags”: [“Furniture”], “status”: “B” },
-{ “item_id”: 103, “item_name”: “Planner”, “tags”: [“Stationery”], “status”: “C” },
-{ “item_id”: 104, “item_name”: “Camera”, “tags”: [“Electronics”, “Photography”], “status”: “A” },
-{ “item_id”: 105, “item_name”: “Printer”, “tags”: [“Electronics”, “Office”], “status”: “B” }
-]
-// Warehouse Collection
-[
-{ “warehouse_id”: 1, “warehouse_name”: “Main Warehouse”, “items_stock”: [{ “item_id”: 101, “quantity”: 400 }, { “item_id”: 103, “quantity”: 30 }] },
-{ “warehouse_id”: 2, “warehouse_name”: “Secondary Warehouse”, “items_stock”: [{ “item_id”: 102, “quantity”: 100 }, { “item_id”: 105, “quantity”: 15 }] },
-{ “warehouse_id”: 3, “warehouse_name”: “Backup Warehouse”, “items_stock”: [{ “item_id”: 104, “quantity”: 250 }, { “item_id”: 103, “quantity”: 10 }] }
-]
+db.createCollection("warehouses");
+db.warehouses.insertMany([
+  { _id: 1, name: "Central Warehouse", location: "Pune" },
+  { _id: 2, name: "East Warehouse", location: "Mumbai" },
+  { _id: 3, name: "West Warehouse", location: "Nashik" },
+  { _id: 4, name: "North Warehouse", location: "Nagpur" },
+  { _id: 5, name: "South Warehouse", location: "Aurangabad" }
+]);
+
+db.createCollection("stock");
+db.stock.insertMany([
+  { _id: 101, item_id: 1, warehouse_id: 1, quantity: 500 },
+  { _id: 102, item_id: 2, warehouse_id: 2, quantity: 15 },
+  { _id: 103, item_id: 3, warehouse_id: 3, quantity: 45 },
+  { _id: 104, item_id: 4, warehouse_id: 4, quantity: 350 },
+  { _id: 105, item_id: 5, warehouse_id: 5, quantity: 100 }
+]);
+
+
+
 a. List all the items where quantity is greater than 300:
-Db.warehouse.find({ “items_stock.quantity”: { $gt: 300 } })
+db.stock.aggregate([
+  { $match: { quantity: { $gt: 300 } } },
+  {
+    $lookup: {
+      from: "items",
+      localField: "item_id",
+      foreignField: "_id",
+      as: "item"
+    }
+  },
+  { $unwind: "$item" },
+  { $project: { _id: 0, "item.name": 1, quantity: 1 } }
+]);
+
+
 b. List all items which have tags less than 5:
-Db.item.find({ “tags”: { $exists: true, $size: { $lt: 5 } } })
+db.items.find(
+  { $expr: { $lt: [ { $size: "$tags" }, 5 ] } },
+  { _id: 0, name: 1, tags: 1 }
+);
+
+
+
 c. List all items having status equal to “B” or having quantity less than 50 and height of the product should be greater than 8:
-Db.item.find({
-$or: [
-{ “status”: “B” },
-{ $and: [{ “quantity”: { $lt: 50 } }, { “height”: { $gt: 8 } }] }
-]
-})
+db.items.find({
+  $or: [
+    { status: "B" },
+    { $and: [ { height: { $gt: 8 } }, { _id: { $in: db.stock.find({ quantity: { $lt: 50 } }).map(s => s.item_id) } } ] }
+  ]
+});
+
 d. Find all warehouses that keep the item “Planner” and have in-stock quantity less than 20:
-Db.warehouse.find({ “items_stock”: { $elemMatch: { “item_id”: 103, “quantity”: { $lt: 20 } } } })
+var planner = db.items.findOne({ name: "Planner" });
+
+db.stock.aggregate([
+  { $match: { item_id: planner._id, quantity: { $lt: 20 } } },
+  {
+    $lookup: {
+      from: "warehouses",
+      localField: "warehouse_id",
+      foreignField: "_id",
+      as: "warehouse"
+    }
+  },
+  { $unwind: "$warehouse" },
+  { $project: { _id: 0, "warehouse.name": 1, quantity: 1 } }
+]);
