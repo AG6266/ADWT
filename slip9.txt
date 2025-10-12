@@ -76,35 +76,62 @@ Background-color: #45a049;
 
 
 Q2)
-// Customer Collection
-[
-{ “customer_id”: 101, “customer_name”: “John Doe”, “address”: “Main St, Pune” },
-{ “customer_id”: 102, “customer_name”: “Alice Smith”, “address”: “Park St, Pimpri” },
-{ “customer_id”: 103, “customer_name”: “Mr. Patil”, “address”: “Hill St, Pimpri” },
-// ... (additional customers)
-]
-// Loan Collection
-[
-{ “loan_id”: 201, “customer_id”: 101, “city”: “Pune”, “loan_type”: “Personal Loan”, “loan_amt”: 50000 },
-{ “loan_id”: 202, “customer_id”: 102, “city”: “Pimpri”, “loan_type”: “Home Loan”, “loan_amt”: 150000 },
-{ “loan_id”: 203, “customer_id”: 103, “city”: “Pimpri”, “loan_type”: “Car Loan”, “loan_amt”: 120000 },
-// ... (additional loans)
-]
+db.createCollection("customers");
+db.customers.insertMany([
+  { _id: 1, name: "Mr. Patil", age: 45, address: "Shivaji Nagar", city: "Pune" },
+  { _id: 2, name: "Deepak Sharma", age: 38, address: "MG Road", city: "Pimpri" },
+  { _id: 3, name: "Divya Kulkarni", age: 29, address: "Baner", city: "Pune" },
+  { _id: 4, name: "Dinesh Joshi", age: 50, address: "Camp", city: "Pimpri" },
+  { _id: 5, name: "Neha Deshmukh", age: 33, address: "Karve Road", city: "Nashik" },
+  { _id: 6, name: "Raj Malhotra", age: 40, address: "Kothrud", city: "Pune" },
+  { _id: 7, name: "Sonal Patil", age: 28, address: "Nigdi", city: "Pimpri" },
+  { _id: 8, name: "Dilip Rane", age: 36, address: "Akurdi", city: "Pimpri" },
+  { _id: 9, name: "Meena Pawar", age: 42, address: "Hadapsar", city: "Pune" },
+  { _id: 10, name: "Kiran Jadhav", age: 31, address: "Viman Nagar", city: "Pune" }
+]);
+
+db.createCollection("loans");
+db.loans.insertMany([
+  { _id: 101, customer_id: 1, loan_type: "Home", loan_amt: 120000, branch: "Pune" },
+  { _id: 102, customer_id: 2, loan_type: "Car", loan_amt: 80000, branch: "Pimpri" },
+  { _id: 103, customer_id: 3, loan_type: "Personal", loan_amt: 50000, branch: "Pune" },
+  { _id: 104, customer_id: 4, loan_type: "Education", loan_amt: 60000, branch: "Pimpri" },
+  { _id: 105, customer_id: 5, loan_type: "Home", loan_amt: 150000, branch: "Nashik" },
+  { _id: 106, customer_id: 6, loan_type: "Car", loan_amt: 70000, branch: "Pune" },
+  { _id: 107, customer_id: 7, loan_type: "Personal", loan_amt: 40000, branch: "Pimpri" },
+  { _id: 108, customer_id: 8, loan_type: "Home", loan_amt: 200000, branch: "Pimpri" },
+  { _id: 109, customer_id: 9, loan_type: "Education", loan_amt: 90000, branch: "Pune" },
+  { _id: 110, customer_id: 10, loan_type: "Car", loan_amt: 60000, branch: "Pune" }
+]);
+
+
 a. List all customers whose name starts with ‘D’ character:
-Db.customer.find({ “customer_name”: /^D/i })
+db.customers.find(
+  { name: { $regex: "^D" } },
+  { _id: 0, name: 1 }
+);
+
 b. List the names of customers in descending order who have taken a loan from Pimpri city:
-Db.customer.find({ “address”: /Pimpri/i }).sort({ “customer_name”: -1 })
+var pimpriCustIds = db.loans.find({ branch: "Pimpri" }).map(l => l.customer_id);
+
+db.customers.find(
+  { _id: { $in: pimpriCustIds } },
+  { _id: 0, name: 1 }
+).sort({ name: -1 });
+
 c. Display customer details having the maximum loan amount:
-Var maxLoanAmount = db.loan.find().sort({ “loan_amt”: -1 }).limit(1).next().loan_amt;
-Db.loan.aggregate([
-{ $match: { “loan_amt”: maxLoanAmount } },
-{ $lookup: { from: “customer”, localField: “customer_id”, foreignField: “customer_id”, as: “customer_info” } },
-{ $unwind: “$customer_info” },
-{ $project: { “customer_info.customer_id”: 1, “customer_info.customer_name”: 1, “customer_info.address”: 1, “loan_type”: 1, “loan_amt”: 1 } }
-])
+var maxLoan = db.loans.find().sort({ loan_amt: -1 }).limit(1).toArray()[0];
+
+db.customers.findOne({ _id: maxLoan.customer_id });
+
+
 d. Update the address of the customer whose name is “Mr. Patil” and loan_amt is greater than 100000:
-Db.customer.update(
-{ “customer_name”: “Mr. Patil”, “customer_id”: { $in: db.loan.find({ “loan_amt”: { $gt: 100000 } }).distinct(“customer_id”) } },
-{ $set: { “address”: “New Address” } },
-{ multi: true }
-)
+var cust = db.customers.findOne({ name: "Mr. Patil" });
+var loan = db.loans.findOne({ customer_id: cust._id, loan_amt: { $gt: 100000 } });
+
+if (loan) {
+  db.customers.updateOne(
+    { _id: cust._id },
+    { $set: { address: "New Address, Pune" } }
+  );
+}
