@@ -109,68 +109,60 @@ Phone: +1 (123) 456-7890
 </html>
 
 Q2)
-// Customer Collection
-[
-{
-“customer_id”: 1,
-“customer_name”: “John Doe”,
-“policies_taken”: [
-{ “policy_id”: 101, “policy_type”: “Komal Jeevan”, “premium_amount”: 15000 },
-{ “policy_id”: 102, “policy_type”: “Health Insurance”, “premium_amount”: 8000 }
-]
-},
-{
-“customer_id”: 2,
-“customer_name”: “Jane Smith”,
-“policies_taken”: [
-{ “policy_id”: 103, “policy_type”: “Term Life”, “premium_amount”: 12000 },
-{ “policy_id”: 104, “policy_type”: “Komal Jeevan”, “premium_amount”: 18000 }
-]
-},
-// ... (additional customers)
-]
-// Policy Collection
-[
-{
-“policy_id”: 101,
-“policy_type”: “Komal Jeevan”,
-“company”: “XYZ Insurance”,
-“benefit”: “Financial support for family”,
-“premium_frequency”: “Monthly”
-},
-{
-“policy_id”: 102,
-“policy_type”: “Health Insurance”,
-“company”: “ABC Insurance”,
-“benefit”: “Coverage for medical expenses”,
-“premium_frequency”: “Yearly”
-},
-{
-“policy_id”: 103,
-“policy_type”: “Term Life”,
-“company”: “XYZ Insurance”,
-“benefit”: “Fixed payout in case of death”,
-“premium_frequency”: “Half Yearly”
-},
-// ... (additional policies)
-]
+
+
+db.createCollection("companies");
+db.companies.insertMany([
+  { _id: 1, name: "LIC", location: "Mumbai" },
+  { _id: 2, name: "HDFC Life", location: "Pune" },
+  { _id: 3, name: "ICICI Prudential", location: "Delhi" },
+  { _id: 4, name: "SBI Life", location: "Bangalore" },
+  { _id: 5, name: "Max Life", location: "Chennai" }
+]);
+
+
+db.createCollection("policies");
+db.policies.insertMany([
+  { _id: 1, policy_name: "Komal Jeevan", policy_type: "Monthly", premium_amount: 5000, company_id: 1 },
+  { _id: 2, policy_name: "Jeevan Anand", policy_type: "Yearly", premium_amount: 60000, company_id: 1 },
+  { _id: 3, policy_name: "Smart Protect", policy_type: "Half Yearly", premium_amount: 25000, company_id: 2 },
+  { _id: 4, policy_name: "Wealth Builder", policy_type: "Monthly", premium_amount: 7000, company_id: 3 },
+  { _id: 5, policy_name: "Child Future", policy_type: "Half Yearly", premium_amount: 20000, company_id: 4 }
+]);
+
+
+db.createCollection("customers");
+db.customers.insertMany([
+  { _id: 1, name: "Amit", age: 35, policy_ids: [1, 2] },
+  { _id: 2, name: "Neha", age: 29, policy_ids: [3] },
+  { _id: 3, name: "Raj", age: 42, policy_ids: [1, 4] },
+  { _id: 4, name: "Sonal", age: 31, policy_ids: [5] },
+  { _id: 5, name: "Vikram", age: 38, policy_ids: [2, 3] }
+]);
+
+
 a. List the details of customers who have taken the “Komal Jeevan” policy:
-Db.customer.find({ “policies_taken.policy_type”: “Komal Jeevan” })
+var policy = db.policies.findOne({ policy_name: "Komal Jeevan" });
+
+db.customers.find(
+  { policy_ids: policy._id }
+);
+
 b. Display the average premium amount:
-Var totalPremium = 0;
-Var totalCustomers = db.customer.count();
-Db.customer.find().forEach(function(customer) {
-Customer.policies_taken.forEach(function(policy) {
-totalPremium += policy.premium_amount;
-});
-});
-Var averagePremium = totalPremium / totalCustomers;
-Print(“Average Premium Amount: “ + averagePremium);
+db.policies.aggregate([
+  { $group: { _id: null, avgPremium: { $avg: "$premium_amount" } } }
+]);
+
+
 c. Increase the premium amount by 5% for policy type “Monthly”:
-Db.policy.update(
-{ “premium_frequency”: “Monthly” },
-{ $mul: { “premium_amount”: 1.05 } },
-{ multi: true }
-)
+db.policies.updateMany(
+  { policy_type: "Monthly" },
+  { $mul: { premium_amount: 1.05 } }
+);
+
 d. Count the number of customers who have taken a policy type “Half Yearly”:
-Db.customer.find({ “policies_taken.policy_type”: “Half Yearly” }).count()
+var halfYearlyPolicies = db.policies.find({ policy_type: "Half Yearly" }).map(p => p._id);
+
+db.customers.countDocuments(
+  { policy_ids: { $in: halfYearlyPolicies } }
+);
