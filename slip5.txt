@@ -60,73 +60,54 @@ Background-color: #f2f2f2;
 </html>
 
 Q2)
-// Project Collection
-[
-{
-“project_id”: 1,
-“project_name”: “Sales Automation”,
-“project_type”: “IT”,
-“duration_months”: 5
-},
-{
-“project_id”: 2,
-“project_name”: “Marketing Campaign”,
-“project_type”: “Marketing”,
-“duration_months”: 2
-},
-{
-“project_id”: 3,
-“project_name”: “Infrastructure Upgrade”,
-“project_type”: “IT”,
-“duration_months”: 6
-},
-{
-“project_id”: 4,
-“project_name”: “Employee Training”,
-“project_type”: “HR”,
-“duration_months”: 4
-},
-{
-“project_id”: 5,
-“project_name”: “Product Launch”,
-“project_type”: “Marketing”,
-“duration_months”: 3
-}
-]
-// Employee Collection
-[
-{
-“employee_id”: 101,
-“employee_name”: “Mr. Patil”,
-“projects_working_on”: [1, 3]
-},
-{
-“employee_id”: 102,
-“employee_name”: “Ms. Deshmukh”,
-“projects_working_on”: [2, 4]
-},
-{
-“employee_id”: 103,
-“employee_name”: “Mr. Shah”,
-“projects_working_on”: [1, 5]
-},
-{
-“employee_id”: 104,
-“employee_name”: “Mrs. Gupta”,
-“projects_working_on”: [3, 4]
-},
-{
-“employee_id”: 105,
-“employee_name”: “Ms. Joshi”,
-“projects_working_on”: [2, 5]
-}
-]
-a. List all names of projects where Project_type = “Marketing”:
-Db.project.find({ project_type: “Marketing” }, { _id: 0, project_name: 1 })
+
+db.createCollection("projects");
+
+db.projects.insertMany([
+  { _id: 1, name: "ERP System", project_type: "Software", duration_months: 6, employees: [1, 2, 3] },
+  { _id: 2, name: "Mobile App", project_type: "Software", duration_months: 4, employees: [2, 4] },
+  { _id: 3, name: "Bridge Construction", project_type: "Civil", duration_months: 12, employees: [5, 6, 7] },
+  { _id: 4, name: "Website Redesign", project_type: "Software", duration_months: 2, employees: [1, 4] },
+  { _id: 5, name: "Mall Project", project_type: "Civil", duration_months: 8, employees: [6, 8, 9] }
+]);
+
+db.createCollection("employees");
+
+db.employees.insertMany([
+  { _id: 1, name: "Mr. Patil", designation: "Developer", project_ids: [1, 4] },
+  { _id: 2, name: "Samantha", designation: "Tester", project_ids: [1, 2] },
+  { _id: 3, name: "John", designation: "Analyst", project_ids: [1] },
+  { _id: 4, name: "Neha", designation: "UI Designer", project_ids: [2, 4] },
+  { _id: 5, name: "Raj", designation: "Engineer", project_ids: [3] },
+  { _id: 6, name: "Priya", designation: "Architect", project_ids: [3, 5] },
+  { _id: 7, name: "Amit", designation: "Supervisor", project_ids: [3] },
+  { _id: 8, name: "Vikram", designation: "Engineer", project_ids: [5] },
+  { _id: 9, name: "Kiran", designation: "Planner", project_ids: [5] },
+  { _id: 10, name: "Meena", designation: "Tester", project_ids: [] }
+]);
+
+
+
+a. List all names of projects where Project_type = “Software”:
+db.projects.find(
+  { project_type: "Software" },
+  { _id: 0, name: 1 }
+);
+
 b. List all the projects with a duration greater than 3 months:
-Db.project.find({ duration_months: { $gt: 3 } })
+db.projects.find(
+  { duration_months: { $gt: 3 } },
+  { _id: 0, name: 1, duration_months: 1 }
+);
+
 c. Count the number of employees working on the “Sales Automation” project:
-Db.employee.find({ projects_working_on: 1 }).count()
+var proj = db.projects.findOne({ name: "ERP System" });
+db.employees.countDocuments({ project_ids: proj._id });
+
 d. List the names of projects on which Mr. Patil is working:
-Var projectsWorkingOn = db.employee.findOne({ employee_name: “Mr. Patil” }).projects_working_on;
-Db.project.find({ project_id: { $in: projectsWorkingOn } }, { _id: 0, project_name: 1 })
+var emp = db.employees.findOne({ name: "Mr. Patil" });
+
+db.projects.find(
+  { _id: { $in: emp.project_ids } },
+  { _id: 0, name: 1 }
+);
