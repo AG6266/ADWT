@@ -47,67 +47,70 @@ Q1)
 </html>
 
 Q2)
-// Hospital Collection
-[
-{
-“hospital_id”: 1,
-“name”: “City Hospital”,
-“city”: “Nashik”,
-“specializations”: [“Pediatric”, “Gynaec”, “Orthopedic”],
-“rating”: 4.5
-},
-{
-“hospital_id”: 2,
-“name”: “Grace Medical Center”,
-“city”: “Nashik”,
-“specializations”: [“Cardiology”, “Dermatology”, “Oncology”],
-“rating”: 3.8
-},
-{
-“hospital_id”: 3,
-“name”: “Sunshine Hospital”,
-“city”: “Nashik”,
-“specializations”: [“Gynaec”, “Orthopedic”, “ENT”],
-“rating”: 4.2
-},
-// ... (additional hospitals)
-]
-// Person Recommendation Collection
-[
-{
-“recommendation_id”: 1,
-“person_name”: “Mr. Patel”,
-“hospital_id”: 1,
-“review”: “Excellent service and facilities!”
-},
-{
-“recommendation_id”: 2,
-“person_name”: “Mrs. Sharma”,
-“hospital_id”: 2,
-“review”: “Great doctors, but parking is an issue.”
-},
-// ... (additional recommendations)
-]
-// Doctor Service Collection
-[
-{
-“doctor_id”: 101,
-“doctor_name”: “Dr. Deshmukh”,
-“hospitals_served”: [1, 3]
-},
-{
-“doctor_id”: 102,
-“doctor_name”: “Dr. Sharma”,
-“hospitals_served”: [2]
-},
-// ... (additional doctors)
-]
+
+// Create hospitals collection
+db.createCollection("hospitals");
+
+// Create doctors collection
+db.createCollection("doctors");
+
+// Create reviews collection
+db.createCollection("reviews");
+
+db.hospitals.insertMany([
+  { _id: 1, name: "CityCare Hospital", city: "Nashik", specializations: ["Pediatric", "Orthopedic"], rating: 4.2 },
+  { _id: 2, name: "Sunshine Hospital", city: "Nashik", specializations: ["Gynaec", "Cardiology"], rating: 3.9 },
+  { _id: 3, name: "Lotus Hospital", city: "Mumbai", specializations: ["Orthopedic", "Neurology"], rating: 4.5 },
+  { _id: 4, name: "Wellness Hospital", city: "Pune", specializations: ["Pediatric", "Dermatology"], rating: 4.0 },
+  { _id: 5, name: "Global Hospital", city: "Nashik", specializations: ["Cardiology", "Orthopedic"], rating: 4.7 },
+  { _id: 6, name: "CarePlus Hospital", city: "Aurangabad", specializations: ["ENT", "Gynaec"], rating: 3.8 },
+  { _id: 7, name: "LifeLine Hospital", city: "Nashik", specializations: ["Orthopedic", "Gynaec"], rating: 4.3 },
+  { _id: 8, name: "Healing Touch Hospital", city: "Nagpur", specializations: ["Pediatric", "Cardiology"], rating: 4.1 },
+  { _id: 9, name: "Metro Hospital", city: "Nashik", specializations: ["Neurology", "Orthopedic"], rating: 3.7 },
+  { _id: 10, name: "PrimeCare Hospital", city: "Nashik", specializations: ["Dermatology", "Gynaec"], rating: 4.4 }
+]);
+
+
+
+db.doctors.insertMany([
+  { _id: 1, name: "Dr. Deshmukh", specialization: "Orthopedic", hospital_ids: [1, 5, 7] },
+  { _id: 2, name: "Dr. Patil", specialization: "Cardiology", hospital_ids: [2, 5] },
+  { _id: 3, name: "Dr. Kulkarni", specialization: "Pediatric", hospital_ids: [1, 4, 8] },
+  { _id: 4, name: "Dr. Joshi", specialization: "Neurology", hospital_ids: [3, 9] },
+  { _id: 5, name: "Dr. Sharma", specialization: "Dermatology", hospital_ids: [4, 10] },
+  { _id: 6, name: "Dr. Mehta", specialization: "ENT", hospital_ids: [6] },
+  { _id: 7, name: "Dr. Rane", specialization: "Gynaec", hospital_ids: [2, 7, 10] },
+  { _id: 8, name: "Dr. Pawar", specialization: "Orthopedic", hospital_ids: [3, 5, 9] },
+  { _id: 9, name: "Dr. Iyer", specialization: "Cardiology", hospital_ids: [5, 8] },
+  { _id: 10, name: "Dr. Chavan", specialization: "Pediatric", hospital_ids: [1, 8] }
+]);
+
+
+
 a. List the names of hospitals with a particular specialization (e.g., Orthopedic):
-Db.hospital.find({ specializations: “Orthopedic” }, { _id: 0, name: 1 })
+db.hospitals.find(
+  { specializations: "Orthopedic" },
+  { _id: 0, name: 1 }
+);
+
 b. List the names of all hospitals located in a specific city (e.g., Nashik):
-Db.hospital.find({ city: “Nashik” }, { _id: 0, name: 1 })
+db.hospitals.find(
+  { city: "Nashik" },
+  { _id: 0, name: 1 }
+);
+
 c. List the names of hospitals where Dr. Deshmukh visits:
-Var hospitalsVisited = db.doctor_service.findOne({ doctor_name: “Dr. Deshmukh” }).hospitals_served;
-Db.hospital.find({ hospital_id: { $in: hospitalsVisited } }, { _id: 0, name: 1 })
+var doc = db.doctors.findOne({ name: "Dr. Deshmukh" });
+
+db.hospitals.find(
+  { _id: { $in: doc.hospital_ids } },
+  { _id: 0, name: 1 }
+);
+
+
+
 d. List the names of hospitals whose rating is greater than or equal to 4:
-Db.hospital.find({ rating: { $gte: 4 } }, { _id: 0, name: 1 })
+db.hospitals.find(
+  { rating: { $gte: 4 } },
+  { _id: 0, name: 1, rating: 1 }
+);
